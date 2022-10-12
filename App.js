@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   TextInput,
   Keyboard,
+  ScrollView,
 } from 'react-native';
 import { theme } from './color';
 
@@ -24,51 +25,57 @@ export default function App() {
     if (text === '') {
       return;
     }
-    const newToDos = Object.assign({}, toDos, {
+    const newToDos = {
+      ...toDos,
       [Date.now()]: { text, work: working },
-    });
+    };
     setToDos(newToDos);
     setText('');
   };
   console.log(toDos);
 
   return (
-    // 빈공간 터치시 키보드 사라짐 (TouchableWithoutFeedback)
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <StatusBar style="auto" />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={work}>
-            <Text
-              style={{
-                ...styles.btnText,
-                color: working ? 'white' : theme.grey,
-              }}
-            >
-              Work
-            </Text>
-          </TouchableOpacity>
-          <TouchableHighlight onPress={travel}>
-            <Text
-              style={{
-                ...styles.btnText,
-                color: !working ? 'white' : theme.grey,
-              }}
-            >
-              Travel
-            </Text>
-          </TouchableHighlight>
-        </View>
-        <TextInput
-          onSubmitEditing={addToDo}
-          onChangeText={onChangeText}
-          returnKeyType="done"
-          value={text}
-          placeholder={working ? 'Add a To Do' : 'Where do you want to go?'}
-          style={styles.input}
-        />
+    // 빈공간 터치시 키보드 사라짐 (TouchableWithoutFeedback => Keyboard.dismiss)
+    <View style={styles.container}>
+      <StatusBar style="auto" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={work}>
+          <Text
+            style={{
+              ...styles.btnText,
+              color: working ? 'white' : theme.grey,
+            }}
+          >
+            Work
+          </Text>
+        </TouchableOpacity>
+        <TouchableHighlight onPress={travel}>
+          <Text
+            style={{
+              ...styles.btnText,
+              color: !working ? 'white' : theme.grey,
+            }}
+          >
+            Travel
+          </Text>
+        </TouchableHighlight>
       </View>
-    </TouchableWithoutFeedback>
+      <TextInput
+        onSubmitEditing={addToDo}
+        onChangeText={onChangeText}
+        returnKeyType="done"
+        value={text}
+        placeholder={working ? 'Add a To Do' : 'Where do you want to go?'}
+        style={styles.input}
+      />
+      <ScrollView>
+        {Object.keys(toDos).map((key) => (
+          <View style={styles.toDo} key={key}>
+            <Text style={styles.toDoText}>{toDos[key].text}</Text>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -92,7 +99,19 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
-    marginTop: 20,
+    marginVertical: 20,
     fontSize: 18,
+  },
+  toDo: {
+    backgroundColor: theme.grey,
+    marginBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+  },
+  toDoText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
