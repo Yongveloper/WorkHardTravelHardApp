@@ -10,7 +10,9 @@ import {
   TextInput,
   Keyboard,
   ScrollView,
+  Alert,
 } from 'react-native';
+import { Fontisto } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from './color';
 
@@ -30,7 +32,11 @@ export default function App() {
   const onChangeText = (payload) => setText(payload);
 
   const saveToDos = async (toSave) => {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const loadToDos = async () => {
@@ -49,6 +55,21 @@ export default function App() {
     setToDos(newToDos);
     await saveToDos(newToDos);
     setText('');
+  };
+
+  const deleteToDo = (key) => {
+    Alert.alert('Delete To Do?', 'Are you sure', [
+      { text: 'Cancel' },
+      {
+        text: "I'm sure",
+        onPress: async () => {
+          const newToDos = { ...toDos };
+          delete newToDos[key];
+          setToDos(newToDos);
+          saveToDos(newToDos);
+        },
+      },
+    ]);
   };
 
   return (
@@ -91,6 +112,9 @@ export default function App() {
             toDos[key].working === working && (
               <View style={styles.toDo} key={key}>
                 <Text style={styles.toDoText}>{toDos[key].text}</Text>
+                <TouchableOpacity onPress={() => deleteToDo(key)}>
+                  <Fontisto name="trash" size={24} color="black" />
+                </TouchableOpacity>
               </View>
             )
         )}
@@ -128,6 +152,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   toDoText: {
     color: 'white',
