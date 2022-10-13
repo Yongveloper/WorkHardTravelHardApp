@@ -17,17 +17,43 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from './color';
 
 const STORAGE_KEY = '@toDos';
+const MENU_KEY = '@menu';
 
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState('');
   const [toDos, setToDos] = useState({});
-  const travel = () => setWorking(false);
-  const work = () => setWorking(true);
 
   useEffect(() => {
+    checkInitialMew();
     loadToDos();
   }, []);
+
+  const saveMenu = async (menu) => {
+    try {
+      await AsyncStorage.setItem(MENU_KEY, menu);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const travel = async () => {
+    setWorking(false);
+    saveMenu('travel');
+  };
+  const work = async () => {
+    setWorking(true);
+    saveMenu('work');
+  };
+
+  const checkInitialMew = async () => {
+    const menu = await AsyncStorage.getItem(MENU_KEY);
+    if (menu === 'work') {
+      setWorking(true);
+    } else {
+      setWorking(false);
+    }
+  };
 
   const onChangeText = (payload) => setText(payload);
 
@@ -35,7 +61,7 @@ export default function App() {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -87,7 +113,7 @@ export default function App() {
             Work
           </Text>
         </TouchableOpacity>
-        <TouchableHighlight onPress={travel}>
+        <TouchableOpacity onPress={travel}>
           <Text
             style={{
               ...styles.btnText,
@@ -96,7 +122,7 @@ export default function App() {
           >
             Travel
           </Text>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
       <TextInput
         onSubmitEditing={addToDo}
