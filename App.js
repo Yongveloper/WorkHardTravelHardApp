@@ -76,11 +76,20 @@ export default function App() {
     }
     const newToDos = {
       ...toDos,
-      [Date.now()]: { text, working },
+      [Date.now()]: { text, working, done: false },
     };
     setToDos(newToDos);
     await saveToDos(newToDos);
     setText('');
+  };
+
+  const completeToDo = async (key) => {
+    const newToDos = {
+      ...toDos,
+      [key]: { ...toDos[key], done: !toDos[key].done },
+    };
+    setToDos(newToDos);
+    await saveToDos(newToDos);
   };
 
   const deleteToDo = (key) => {
@@ -137,10 +146,34 @@ export default function App() {
           (key) =>
             toDos[key].working === working && (
               <View style={styles.toDo} key={key}>
-                <Text style={styles.toDoText}>{toDos[key].text}</Text>
-                <TouchableOpacity onPress={() => deleteToDo(key)}>
-                  <Fontisto name="trash" size={24} color="black" />
-                </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.toDoText,
+                    toDos[key].done && styles.finishToDoText,
+                  ]}
+                >
+                  {toDos[key].text}
+                </Text>
+                <View style={styles.toDoIcons}>
+                  <TouchableOpacity onPress={() => completeToDo(key)}>
+                    {toDos[key].done === true ? (
+                      <Fontisto
+                        name="checkbox-active"
+                        size={24}
+                        color="black"
+                      />
+                    ) : (
+                      <Fontisto
+                        name="checkbox-passive"
+                        size={24}
+                        color="black"
+                      />
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => deleteToDo(key)}>
+                    <Fontisto name="trash" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
               </View>
             )
         )}
@@ -186,5 +219,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '500',
+  },
+  finishToDoText: {
+    textDecorationLine: 'line-through',
+    color: 'grey',
+  },
+  toDoIcons: {
+    flexDirection: 'row',
   },
 });
